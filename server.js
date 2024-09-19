@@ -32,128 +32,239 @@ function validateContact(contact) {
     if (!('Email' in contact)) return 'Email is missing';
     return '';
 }
+function validateBookmark(bookmark) {
+    if (!('Title' in bookmark)) return 'Title is missing';
+    if (!('Url' in bookmark)) return 'Url is missing';
+    if (!('Category' in bookmark)) return 'Category is missing';
+    return '';
+}
 async function handleContactsServiceRequest(req, res) {
-    if (req.url.includes("/api/contacts")) {
-        const contactsFilePath = "./contacts.json";
-        let contactsJSON = fs.readFileSync(contactsFilePath);
-        let contacts = JSON.parse(contactsJSON);
-        let validStatus = '';
-        let id = extract_Id_From_Request(req);
-        switch (req.method) {
-            case 'GET':
-                if (isNaN(id)) {
-                    res.writeHead(200, { 'content-type': 'application/json' });
-                    res.end(contactsJSON);
-                } else {
-                    let found = false;
-                    for (let contact of contacts) {
-                        if (contact.Id === id) {
-                            found = true;
-                            res.writeHead(200, { 'content-type': 'application/json' });
-                            res.end(JSON.stringify(contact));
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        res.writeHead(404);
-                        res.end(`Error : The contact of id ${id} does not exist`);
+
+    const contactsFilePath = "./contacts.json";
+    let contactsJSON = fs.readFileSync(contactsFilePath);
+    let contacts = JSON.parse(contactsJSON);
+    let validStatus = '';
+    let id = extract_Id_From_Request(req);
+    switch (req.method) {
+        case 'GET':
+            if (isNaN(id)) {
+                res.writeHead(200, { 'content-type': 'application/json' });
+                res.end(contactsJSON);
+            } else {
+                let found = false;
+                for (let contact of contacts) {
+                    if (contact.Id === id) {
+                        found = true;
+                        res.writeHead(200, { 'content-type': 'application/json' });
+                        res.end(JSON.stringify(contact));
+                        break;
                     }
                 }
-                break;
-            case 'POST':
-                let newContact = await getPayload(req);
-                validStatus = validateContact(newContact);
-                if (validStatus == '') {
-                    let maxId = 0;
-                    contacts.forEach(contact => {
-                        if (contact.Id > maxId)
-                            maxId = contact.Id;
-                    });
-                    newContact.Id = maxId + 1;
-                    contacts.push(newContact);
-                    fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
-                    res.writeHead(201, { 'content-type': 'application/json' });
-                    res.end(JSON.stringify(newContact));
-                } else {
-                    res.writeHead(400);
-                    res.end(`Error: ${validStatus}`);
+                if (!found) {
+                    res.writeHead(404);
+                    res.end(`Error : The contact of id ${id} does not exist`);
                 }
-                break;
-            case 'PUT':
-                let modifiedContact = await getPayload(req);
-                validStatus = validateContact(modifiedContact);
-                if (validStatus == '') {
-                    if (!isNaN(id)) {
-                        if (!('Id' in modifiedContact)) modifiedContact.Id = id;
-                        if (modifiedContact.Id == id) {
-                            let storedContact = null;
-                            for (let contact of contacts) {
-                                if (contact.Id === id) {
-                                    storedContact = contact;
-                                    break;
-                                }
-                            }
-                            if (storedContact != null) {
-                                storedContact.Name = modifiedContact.Name;
-                                storedContact.Phone = modifiedContact.Phone;
-                                storedContact.Email = modifiedContact.Email;
-                                fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
-                                res.writeHead(200);
-                                res.end();
-                            } else {
-                                res.writeHead(404);
-                                res.end(`Error: The contact of id ${id} does not exist.`);
-                            }
-                        } else {
-                            res.writeHead(409);
-                            res.end(`Error: Conflict of id`);
-                        }
-                    } else {
-                        res.writeHead(400);
-                        res.end("Error : You must provide the id of contact to modify.");
-                    }
-                } else {
-                    res.writeHead(400);
-                    res.end(`Error: ${validStatus}`);
-                }
-                break;
-            case 'DELETE':
+            }
+            break;
+        case 'POST':
+            let newContact = await getPayload(req);
+            validStatus = validateContact(newContact);
+            if (validStatus == '') {
+                let maxId = 0;
+                contacts.forEach(contact => {
+                    if (contact.Id > maxId)
+                        maxId = contact.Id;
+                });
+                newContact.Id = maxId + 1;
+                contacts.push(newContact);
+                fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
+                res.writeHead(201, { 'content-type': 'application/json' });
+                res.end(JSON.stringify(newContact));
+            } else {
+                res.writeHead(400);
+                res.end(`Error: ${validStatus}`);
+            }
+            break;
+        case 'PUT':
+            let modifiedContact = await getPayload(req);
+            validStatus = validateContact(modifiedContact);
+            if (validStatus == '') {
                 if (!isNaN(id)) {
-                    let index = 0;
-                    let oneDeleted = false;
-                    for (let contact of contacts) {
-                        if (contact.Id === id) {
-                            contacts.splice(index, 1);
-                            fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
-                            oneDeleted = true;
-                            break;
+                    if (!('Id' in modifiedContact)) modifiedContact.Id = id;
+                    if (modifiedContact.Id == id) {
+                        let storedContact = null;
+                        for (let contact of contacts) {
+                            if (contact.Id === id) {
+                                storedContact = contact;
+                                break;
+                            }
                         }
-                        index++;
-                    }
-                    if (oneDeleted) {
-                        res.writeHead(204); // success no content
-                        res.end();
+                        if (storedContact != null) {
+                            storedContact.Name = modifiedContact.Name;
+                            storedContact.Phone = modifiedContact.Phone;
+                            storedContact.Email = modifiedContact.Email;
+                            fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
+                            res.writeHead(200);
+                            res.end();
+                        } else {
+                            res.writeHead(404);
+                            res.end(`Error: The contact of id ${id} does not exist.`);
+                        }
                     } else {
-                        res.writeHead(404);
-                        res.end(`Error: The contact of id ${id} does not exist.`);
+                        res.writeHead(409);
+                        res.end(`Error: Conflict of id`);
                     }
                 } else {
                     res.writeHead(400);
-                    res.end("Error : You must provide the id of contact to delete.");
+                    res.end("Error : You must provide the id of contact to modify.");
                 }
-                break;
-            case 'PATCH':
-                res.writeHead(501);
-                res.end("Error: The endpoint PATCH api/contacts is not implemented.");
-                break;
-        }
-        return true;
+            } else {
+                res.writeHead(400);
+                res.end(`Error: ${validStatus}`);
+            }
+            break;
+        case 'DELETE':
+            if (!isNaN(id)) {
+                let index = 0;
+                let oneDeleted = false;
+                for (let contact of contacts) {
+                    if (contact.Id === id) {
+                        contacts.splice(index, 1);
+                        fs.writeFileSync(contactsFilePath, JSON.stringify(contacts));
+                        oneDeleted = true;
+                        break;
+                    }
+                    index++;
+                }
+                if (oneDeleted) {
+                    res.writeHead(204); // success no content
+                    res.end();
+                } else {
+                    res.writeHead(404);
+                    res.end(`Error: The contact of id ${id} does not exist.`);
+                }
+            } else {
+                res.writeHead(400);
+                res.end("Error : You must provide the id of contact to delete.");
+            }
+            break;
+        case 'PATCH':
+            res.writeHead(501);
+            res.end("Error: The endpoint PATCH api/contacts is not implemented.");
+            break;
     }
-    return false;
+    return true;
+
+}
+async function handleBookmarksServiceRequest(req, res) {
+    const bookmarksFilePath = "./bookmarks.json";
+    let bookmarksJSON = fs.readFileSync(bookmarksFilePath);
+    let bookmarks = JSON.parse(bookmarksJSON);
+    let validStatus = '';
+    let id = extract_Id_From_Request(req);
+
+    switch (req.method) {
+        case "GET":
+            if (isNaN(id)) {
+                res.writeHead(200, { 'content-type': 'application/json' });
+                res.end(bookmarksJSON);
+            } else {
+                let found = bookmarks.find(bookmark => bookmark.Id === id);
+                if (found) {
+                    res.writeHead(200, { 'content-type': 'application/json' });
+                    res.end(JSON.stringify(found));
+                } else {
+                    res.writeHead(404);
+                    res.end(`Error: The bookmark with id ${id} does not exist.`);
+                }
+            }
+            break;
+
+        case "POST":
+            let newBookmark = await getPayload(req);
+            validStatus = validateBookmark(newBookmark);
+            if (validStatus === '') {
+                let maxId = bookmarks.reduce((max, bookmark) => (bookmark.Id > max ? bookmark.Id : max), 0);
+                newBookmark.Id = maxId + 1;
+                bookmarks.push(newBookmark);
+                fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                res.writeHead(201, { 'content-type': 'application/json' });
+                res.end(JSON.stringify(newBookmark));
+            } else {
+                res.writeHead(400);
+                res.end(`Error: ${validStatus}`);
+            }
+            break;
+
+        case "PUT":
+            let modifiedBookmark = await getPayload(req);
+            validStatus = validateBookmark(modifiedBookmark);
+            if (validStatus === '') {
+                if (!isNaN(id)) {
+                    modifiedBookmark.Id = modifiedBookmark.Id || id;
+                    if (modifiedBookmark.Id === id) {
+                        let storedBookmark = bookmarks.find(bookmark => bookmark.Id === id);
+                        if (storedBookmark) {
+                            Object.assign(storedBookmark, modifiedBookmark);
+                            fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                            res.writeHead(200);
+                            res.end();
+                        } else {
+                            res.writeHead(404);
+                            res.end(`Error: The bookmark with id ${id} does not exist.`);
+                        }
+                    } else {
+                        res.writeHead(409);
+                        res.end('Error: Conflict of id');
+                    }
+                } else {
+                    res.writeHead(400);
+                    res.end('Error: You must provide the id of the bookmark to modify.');
+                }
+            } else {
+                res.writeHead(400);
+                res.end(`Error: ${validStatus}`);
+            }
+            break;
+
+        case "DELETE":
+            if (!isNaN(id)) {
+                const index = bookmarks.findIndex(bookmark => bookmark.Id === id);
+                if (index !== -1) {
+                    bookmarks.splice(index, 1);
+                    fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                    res.writeHead(204);
+                    res.end();
+                } else {
+                    res.writeHead(404);
+                    res.end(`Error: The bookmark with id ${id} does not exist.`);
+                }
+            } else {
+                res.writeHead(400);
+                res.end('Error: You must provide the id of the bookmark to delete.');
+            }
+            break;
+    }
+
+    return true; // Ensure the function returns true if it handles a request
 }
 
+// async function handleRequest(req, res) {
+//     if (! await handleContactsServiceRequest(req, res))
+//         if (! await handleBookmarksServiceRequest(req, res))
+//             return false;
+//     return true;
+// }
+
 function handleRequest(req, res) {
-    return handleContactsServiceRequest(req, res);
+    if (req.url.includes("/api/contacts")) {
+        return handleContactsServiceRequest(req, res);
+    }
+
+    if (req.url.includes("/api/bookmarks")) {
+        return handleBookmarksServiceRequest(req, res);
+    }
+
 }
 
 function getPayload(req) {
@@ -169,7 +280,7 @@ function getPayload(req) {
         });
     })
 }
-function handleIncomingHttpRequest(req,res){
+function handleIncomingHttpRequest(req, res) {
     console.log(req.method, req.url);
     accessControlConfig(req, res);
     if (!CORS_Preflight(req, res))

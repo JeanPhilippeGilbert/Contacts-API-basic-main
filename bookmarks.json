@@ -1,0 +1,20 @@
+[
+    {
+        "Id": 2,
+        "Title": "Facebook",
+        "Url": "https://www.facebook.com/",
+        "Category": "social media"
+    },
+    {
+        "Id": 3,
+        "Title": "Instagram",
+        "Url": "https://www.instagram.com/",
+        "Category": "Photo"
+    },
+    {
+        "Id": 4,
+        "Title": "X",
+        "Url": "https://x.com/?lang=fr&mx=2",
+        "Category": "social media"
+    }
+]

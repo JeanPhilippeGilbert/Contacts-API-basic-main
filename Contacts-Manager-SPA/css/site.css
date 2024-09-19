@@ -83,7 +83,7 @@
     display: grid;
     grid-template-columns: 4fr 1fr;
     align-items: top;
-    background-color: rgb(87, 140, 255);
+    background-color: rgb(204, 203, 203);
     border-radius: 6px;
 }
 
@@ -106,7 +106,7 @@
 
 .contactLayout {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto auto;
     padding: 10px;
     gap: 8px;
     align-items: center;
@@ -115,7 +115,7 @@
 .contactName {
     font-size: 1.1rem;
     font-weight: bold;
-    color: white;
+    color: rgb(0, 0, 0);
 }
 
 .contactPhone {
@@ -123,7 +123,8 @@
 }
 
 .contactEmail {
-    color: white;
+    pointer-events: auto; /* Ensure the link is clickable */
+    margin-left: 20px;
 }
 
 .contactCommandPanel {
@@ -192,5 +193,38 @@ input {
 
 a {
     text-decoration: none !important;
-    color: white !important;
+}
+.bookmarkLayout {
+    margin-bottom: 16px; /* Space between bookmarks */
+    display: flex;
+    flex-direction: column; /* Stack the elements vertically */
+    align-items: flex-start; /* Align elements to the left */
+    font-family: Arial, sans-serif; /* Basic font for styling */
+}
+
+.bookmarkHeader {
+    display: flex;
+    align-items: center; /* Align the image and title horizontally */
+    margin-bottom: 8px; /* Space between the title and category */
+}
+
+.bookmarkIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px; /* Space between the image and the title */
+}
+
+.bookmarkTitle {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.bookmarkCategory {
+    color: #007bff; /* Bootstrap-like blue for the link */
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.bookmarkCategory:hover {
+    text-decoration: underline; /* Add underline on hover */
 }

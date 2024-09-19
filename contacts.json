@@ -28,5 +28,17 @@
         "Name": "Stéphane Chassé",
         "Phone": "(450) 430-1312",
         "Email": "Stephane.Chasse@clg.qc.ca"
+    },
+    {
+        "Name": "Kyle Ross",
+        "Phone": "(450) 444-4444",
+        "Email": "Kyle.Ross@clg.qc.ca",
+        "Id": 6
+    },
+    {
+        "Id": 7,
+        "Name": "Jean-Philippe Gilbert",
+        "Phone": "(438) 393-8840",
+        "Email": "jean.philippe.gilbert01@gmail.com"
     }
 ]

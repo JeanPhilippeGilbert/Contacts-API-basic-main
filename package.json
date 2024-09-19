@@ -11,6 +11,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "Nicolas Chourot",
+  "author": "JeanPhilipppeGilbert",
   "license": "ISC"
 }
